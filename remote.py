@@ -6,12 +6,16 @@ from remotemanager import URL, Dataset
 from remotemanager.storage.function import Function
 from remotemanager.dataset.runner import RunnerFailedError
 import logging
+from remotemanager import Logger
 
 # Configure the logging module
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')  # Set the logging level to DEBUG for all loggers
 logger = logging.getLogger("remote")  # Create a logger with the name "remote"
 file_handler = logging.FileHandler("remoterun.log")  # Add a file handler to log to the specified file
 logger.addHandler(file_handler)  # Add the file handler to the logger
+
+# update remotemanager Logger settings
+Logger.level = "Debug"
 
 
 mcp = FastMCP("RemoteRun")
