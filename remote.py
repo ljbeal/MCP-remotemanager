@@ -31,7 +31,7 @@ def validate_function(function_source: str) -> str:
         ast.parse(function_source)
     except SyntaxError as e:
          logger.error(f"Unable to parse function source code: {e}")
-         return f"Unable to parse function source code: {e}"
+         return f"Unable to parse function source code. Please ensure that it is valid python: {e}"
     logger.info("Function source code is valid.")
     return ""
 
