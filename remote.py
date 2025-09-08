@@ -55,7 +55,7 @@ def validate_url(hostname: str) -> str:
         url.cmd("pwd", timeout=1, max_timeouts=1)
     except RuntimeError as e:
         logger.error(f"Invalid hostname or unable to connect: {e}")
-        return f"Invalid hostname or unable to connect: {e}"
+        return f"Invalid hostname or unable to connect. Validate that the hostname ({hostname}) is accurate:\n{e}"
     logger.info("Hostname is valid.")
     return ""
 
@@ -72,7 +72,7 @@ async def run_code(function_source: str, hostname: str, **kwargs: Any) -> dict[s
     Returns:
         str: The result of the function execution.
     """
-    logger.info("Starting function execution.")
+    logger.info("#### New function execution. ####")
     validation_error = validate_function(function_source)
     if validation_error:
         return {"Error": validation_error}
