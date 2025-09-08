@@ -12,3 +12,6 @@ wheels/
 # remotemanager files
 temp_runner_*
 dataset*.yaml
+
+# logs
+*.log
