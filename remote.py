@@ -60,7 +60,7 @@ def validate_url(hostname: str) -> str:
     return ""
 
 @mcp.tool()
-async def run_code(function_source: str, hostname: str, **kwargs: Any) -> str:
+async def run_code(function_source: str, hostname: str, **kwargs: Any) -> dict[str, Any]:
     """
     Run a function defined by its source code string with the given arguments.
 
@@ -72,31 +72,33 @@ async def run_code(function_source: str, hostname: str, **kwargs: Any) -> str:
     Returns:
         str: The result of the function execution.
     """
+    logger.info("Starting function execution.")
     validation_error = validate_function(function_source)
     if validation_error:
-        return validation_error
+        return {"Error": validation_error}
     
     validation_error = validate_url(hostname)
     if validation_error:
-        return validation_error
+        return {"Error": validation_error}
 
+    logger.info(f"Creating remote URL with hostname {hostname}")
     url = URL(hostname, verbose=0)
 
     ds = Dataset(Function(function_source), url=url, skip=False, verbose=False)
 
-    ds.append_run(kwargs)
+    ds.append_run(args=kwargs)
 
     ds.run()
-
     ds.wait(1, 10)
-
     ds.fetch_results()
     
-    if isinstance(ds.results[0], RunnerFailedError):
-        logger.error(f"Function execution failed: {ds.results[0]}")
-        return f"Function execution failed: {ds.results[0]}"
-    logger.info("Function executed successfully.")
-    return str(ds.results[0])
+    result = ds.results[0]
+    if isinstance(result, RunnerFailedError):
+        logger.error(f"Function execution failed: {result}")
+        return {"Error": f"Function execution failed: {result}"}
+
+    logger.info(f"Function executed successfully. Result: {result}")
+    return {"Result": str(result)}
 
 
 if __name__ == "__main__":
