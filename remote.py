@@ -1,7 +1,9 @@
 import ast
 import logging
+import anyio
 
 from typing import Any, Optional
+import anyio.to_thread
 from mcp.server.fastmcp import FastMCP
 from prompts import server_instructions
 
@@ -120,7 +122,7 @@ async def run_code(function_source: str, hostname: str, function_args: Optional[
     ds.append_run(args=function_args)
 
     ds.run()
-    ds.wait(1, 10)
+    await anyio.to_thread.run_sync(ds.wait, 1, 300)
     ds.fetch_results()
     
     ### handle results/errors ###
