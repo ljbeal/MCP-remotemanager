@@ -1,7 +1,7 @@
 import ast
 import logging
 
-from typing import Any
+from typing import Any, Optional
 from mcp.server.fastmcp import FastMCP
 from prompts import server_instructions
 
@@ -64,7 +64,7 @@ def validate_url(hostname: str) -> str:
 
 
 @mcp.tool()
-async def run_code(function_source: str, hostname: str, function_args: dict[str, Any]) -> dict[str, Any]:
+async def run_code(function_source: str, hostname: str, function_args: Optional[dict[str, Any]] = None) -> dict[str, Any]:
     """
     Run a function defined by its source code string with the given arguments.
     The function will be executed on a remote server specified by the hostname.
@@ -73,11 +73,14 @@ async def run_code(function_source: str, hostname: str, function_args: dict[str,
     Args:
         function_source (str): The source code of the function to run. This must be a single, valid python function that can be executed directly with no imports.
         hostname (str): The hostname of the remote server to execute the function on.
-        function_args (): Keyword arguments to pass to the function.
+        function_args (optional, dict): Keyword arguments to pass to the function.
 
     Returns:
         dict: The result of the execution. If successful, returns {"Result": <result>}. If there was an error, returns {"Error": <error_message>}.
     """
+    if function_args is None:
+        function_args = {}
+
     logger.info("#### New function execution. ####")
     validation_error = validate_function(function_source)
     if validation_error:
