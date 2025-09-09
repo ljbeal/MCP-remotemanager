@@ -62,15 +62,18 @@ def validate_url(hostname: str) -> str:
     logger.info("Hostname is valid.")
     return ""
 
+
 @mcp.tool()
-async def run_code(function_source: str, hostname: str, **kwargs: Any) -> dict[str, Any]:
+async def run_code(function_source: str, hostname: str, function_args: dict[str, Any]) -> dict[str, Any]:
     """
     Run a function defined by its source code string with the given arguments.
+    The function will be executed on a remote server specified by the hostname.
+    The function should also take keyword arguments, to be provided to the function_args parameter as a dictionary.
 
     Args:
         function_source (str): The source code of the function to run. This must be a single, valid python function that can be executed directly with no imports.
         hostname (str): The hostname of the remote server to execute the function on.
-        **kwargs (Any): Keyword arguments to pass to the function.
+        function_args (): Keyword arguments to pass to the function.
 
     Returns:
         str: The result of the function execution.
@@ -89,7 +92,7 @@ async def run_code(function_source: str, hostname: str, **kwargs: Any) -> dict[s
 
     ds = Dataset(Function(function_source), url=url, skip=False, verbose=False)
 
-    ds.append_run(args=kwargs)
+    ds.append_run(args=function_args)
 
     ds.run()
     ds.wait(1, 10)
