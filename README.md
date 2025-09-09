@@ -14,3 +14,20 @@ Simply clone the repo and then `uv pip install -e .`
 
 ## Server
 Run the MCP server with `uvx remoterun/remote.py`
+
+## Testing
+The testing toolchain is currently entirely local and looks like this:
+- `gpt-oss` running locally via ollama
+-  `open-webui` frontend
+-  remote.py MCP server running via MCPO translation layer (for openwebui)
+-  The remote machine is a bare metal linux machine
+
+### links
+
+remotemanager: https://gitlab.com/l_sim/remotemanager
+
+FastMCP: https://gofastmcp.com/getting-started/welcome
+
+gpt-oss: https://huggingface.co/openai/gpt-oss-20b
+
+open-webui: https://github.com/open-webui/open-webui
