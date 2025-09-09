@@ -2,9 +2,10 @@ import ast
 import logging
 import anyio
 
-from typing import Any, Optional
+from typing import Annotated, Any, Optional
 import anyio.to_thread
 from mcp.server.fastmcp import FastMCP
+from pydantic import Field
 from remoterun.prompts import server_instructions
 
 from remotemanager import Logger
@@ -88,7 +89,24 @@ def generate_name(fn_name: str, hostname: str) -> str:
 
 @mcp.tool()
 async def run_code(
-    function_source: str, hostname: str, function_args: Optional[dict[str, Any]] = None
+    function_source: Annotated[
+        str,
+        Field(
+            description="The source code of the function to run. This must be a single, valid python function that can be executed directly with no imports."
+        ),
+    ],
+    hostname: Annotated[
+        str,
+        Field(
+            description="The hostname of the remote server to execute the function on."
+        ),
+    ],
+    function_args: Annotated[
+        Optional[dict[str, Any]],
+        Field(
+            description="Keyword args to pass to the function defined by function_source. Must be a dictionary of {arg: val} that matches the signature of the source code."
+        ),
+    ] = None,
 ) -> dict[str, Any]:
     """
     Run a function defined by its source code string with the given arguments.
@@ -96,7 +114,7 @@ async def run_code(
     The function should also take keyword arguments, to be provided to the function_args parameter as a dictionary.
 
     Args:
-        function_source (str): The source code of the function to run. This must be a single, valid python function that can be executed directly with no imports.
+        function_source (str): The source code of the function to run.
         hostname (str): The hostname of the remote server to execute the function on.
         function_args (optional, dict): Keyword arguments to pass to the function.
 
