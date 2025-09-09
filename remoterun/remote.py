@@ -5,6 +5,7 @@ import anyio
 from typing import Annotated, Any, Optional
 import anyio.to_thread
 from mcp.server.fastmcp import FastMCP
+from mcp.server.fastmcp.exceptions import ToolError
 from pydantic import Field
 from remoterun.prompts import server_instructions
 
@@ -127,11 +128,11 @@ async def run_code(
     logger.info("#### New function execution. ####")
     validation_error = validate_function(function_source)
     if validation_error:
-        return {"Error": validation_error}
+        raise ToolError(validation_error)
 
     validation_error = validate_url(hostname)
     if validation_error:
-        return {"Error": validation_error}
+        raise ToolError(validation_error)
 
     ### remotemanager setup ###
     logger.info(f"Creating remote URL with hostname {hostname}")
