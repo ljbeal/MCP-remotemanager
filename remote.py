@@ -122,7 +122,10 @@ async def run_code(function_source: str, hostname: str, function_args: Optional[
     ds.append_run(args=function_args)
 
     ds.run()
+
+    logger.info("Waiting for function to complete. This may take a while...")
     await anyio.to_thread.run_sync(ds.wait, 1, 300)
+    logger.info("Function execution completed, fetching results.")
     ds.fetch_results()
     
     ### handle results/errors ###
