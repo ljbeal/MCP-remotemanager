@@ -5,7 +5,7 @@ import anyio
 from typing import Any, Optional
 import anyio.to_thread
 from mcp.server.fastmcp import FastMCP
-from prompts import server_instructions
+from remoterun.prompts import server_instructions
 
 from remotemanager import Logger
 from remotemanager import URL, Dataset
@@ -13,9 +13,13 @@ from remotemanager.storage.function import Function
 from remotemanager.dataset.runner import RunnerFailedError
 
 # Configure the logging module
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')  # Set the logging level to DEBUG for all loggers
+logging.basicConfig(
+    level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)  # Set the logging level to DEBUG for all loggers
 logger = logging.getLogger("remote")  # Create a logger with the name "remote"
-file_handler = logging.FileHandler("remoterun.log")  # Add a file handler to log to the specified file
+file_handler = logging.FileHandler(
+    "remoterun.log"
+)  # Add a file handler to log to the specified file
 logger.addHandler(file_handler)  # Add the file handler to the logger
 
 # update remotemanager Logger settings
@@ -38,8 +42,8 @@ def validate_function(function_source: str) -> str:
     try:
         ast.parse(function_source)
     except SyntaxError as e:
-         logger.error(f"Unable to parse function source code: {e}")
-         return f"Unable to parse function source code. Please ensure that it is valid python: {e}"
+        logger.error(f"Unable to parse function source code: {e}")
+        return f"Unable to parse function source code. Please ensure that it is valid python: {e}"
     logger.info("Function source code is valid.")
     return ""
 
@@ -55,7 +59,7 @@ def validate_url(hostname: str) -> str:
         str: An error message if the hostname is invalid, otherwise an empty string.
     """
     url = URL(hostname, verbose=0)
-    
+
     try:
         url.cmd("pwd", timeout=1, max_timeouts=1)
     except RuntimeError as e:
@@ -77,12 +81,15 @@ def generate_name(fn_name: str, hostname: str) -> str:
         str: The generated unique name.
     """
     from datetime import datetime
+
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     return f"{fn_name}_{hostname}_{timestamp}"
 
 
 @mcp.tool()
-async def run_code(function_source: str, hostname: str, function_args: Optional[dict[str, Any]] = None) -> dict[str, Any]:
+async def run_code(
+    function_source: str, hostname: str, function_args: Optional[dict[str, Any]] = None
+) -> dict[str, Any]:
     """
     Run a function defined by its source code string with the given arguments.
     The function will be executed on a remote server specified by the hostname.
@@ -103,7 +110,7 @@ async def run_code(function_source: str, hostname: str, function_args: Optional[
     validation_error = validate_function(function_source)
     if validation_error:
         return {"Error": validation_error}
-    
+
     validation_error = validate_url(hostname)
     if validation_error:
         return {"Error": validation_error}
@@ -116,7 +123,14 @@ async def run_code(function_source: str, hostname: str, function_args: Optional[
     fn = Function(function_source)
     base_name = generate_name(fn.name, hostname)
 
-    ds = Dataset(fn, name = base_name, local_dir = f"staging_{base_name}", url=url, skip=False, verbose=False)
+    ds = Dataset(
+        fn,
+        name=base_name,
+        local_dir=f"staging_{base_name}",
+        url=url,
+        skip=False,
+        verbose=False,
+    )
 
     ### Append a run, then execute ###
     ds.append_run(args=function_args)
@@ -127,7 +141,7 @@ async def run_code(function_source: str, hostname: str, function_args: Optional[
     await anyio.to_thread.run_sync(ds.wait, 1, 300)
     logger.info("Function execution completed, fetching results.")
     ds.fetch_results()
-    
+
     ### handle results/errors ###
     result = ds.results[0]
     if isinstance(result, RunnerFailedError):

@@ -1,2 +1,0 @@
-server_instructions = """This server provides functionality to run Python functions remotely on a specified server.
-Provide a valid python function as a string, along with the hostname of the server where the function should be executed."""
