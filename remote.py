@@ -3,6 +3,7 @@ import logging
 
 from typing import Any
 from mcp.server.fastmcp import FastMCP
+from prompts import server_instructions
 
 from remotemanager import Logger
 from remotemanager import URL, Dataset
@@ -19,7 +20,7 @@ logger.addHandler(file_handler)  # Add the file handler to the logger
 Logger.level = "Debug"
 
 
-mcp = FastMCP("RemoteRun")
+mcp = FastMCP(name="RemoteRun", instructions=server_instructions)
 
 
 def validate_function(function_source: str) -> str:
@@ -39,6 +40,7 @@ def validate_function(function_source: str) -> str:
          return f"Unable to parse function source code. Please ensure that it is valid python: {e}"
     logger.info("Function source code is valid.")
     return ""
+
 
 def validate_url(hostname: str) -> str:
     """
