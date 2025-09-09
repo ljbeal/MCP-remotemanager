@@ -63,6 +63,22 @@ def validate_url(hostname: str) -> str:
     return ""
 
 
+def generate_name(fn_name: str, hostname: str) -> str:
+    """
+    Generate a unique name by appending a timestamp to the base name.
+
+    Args:
+        fn_name (str): The name of the function.
+        hostname (str): The hostname where the function will be executed.
+
+    Returns:
+        str: The generated unique name.
+    """
+    from datetime import datetime
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    return f"{fn_name}_{hostname}_{timestamp}"
+
+
 @mcp.tool()
 async def run_code(function_source: str, hostname: str, function_args: Optional[dict[str, Any]] = None) -> dict[str, Any]:
     """
@@ -90,17 +106,24 @@ async def run_code(function_source: str, hostname: str, function_args: Optional[
     if validation_error:
         return {"Error": validation_error}
 
+    ### remotemanager setup ###
     logger.info(f"Creating remote URL with hostname {hostname}")
     url = URL(hostname, verbose=0)
 
-    ds = Dataset(Function(function_source), url=url, skip=False, verbose=False)
+    ### Create the Function and Dataset ###
+    fn = Function(function_source)
+    base_name = generate_name(fn.name, hostname)
 
+    ds = Dataset(fn, name = base_name, local_dir = f"staging_{base_name}", url=url, skip=False, verbose=False)
+
+    ### Append a run, then execute ###
     ds.append_run(args=function_args)
 
     ds.run()
     ds.wait(1, 10)
     ds.fetch_results()
     
+    ### handle results/errors ###
     result = ds.results[0]
     if isinstance(result, RunnerFailedError):
         logger.error(f"Function execution failed: {result}")
