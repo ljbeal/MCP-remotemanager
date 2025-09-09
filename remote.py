@@ -76,7 +76,7 @@ async def run_code(function_source: str, hostname: str, function_args: dict[str,
         function_args (): Keyword arguments to pass to the function.
 
     Returns:
-        str: The result of the function execution.
+        dict: The result of the execution. If successful, returns {"Result": <result>}. If there was an error, returns {"Error": <error_message>}.
     """
     logger.info("#### New function execution. ####")
     validation_error = validate_function(function_source)
