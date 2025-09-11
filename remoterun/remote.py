@@ -1,5 +1,6 @@
 import ast
 import logging
+import os
 import anyio
 
 from typing import Annotated, Any, Optional
@@ -140,6 +141,19 @@ async def run_code(
 
     ### Create the Function and Dataset ###
     fn = Function(function_source)
+
+    try:
+        logger.info("Testing function execution locally to ensure it runs.")
+        cache_env = os.environ.get("BIGDFT_MPIDRYRUN", "0")
+        os.environ["BIGDFT_MPIDRYRUN"] = "1"
+        fn(**function_args)
+
+        os.environ["BIGDFT_MPIDRYRUN"] = cache_env
+
+    except Exception as e:
+        logger.error(f"Function test execution failed: {e}")
+        raise ToolError(f"Function test execution failed. Ensure the function can be executed as-is: {e}")
+
     base_name = generate_name(fn.name, hostname)
 
     ds = Dataset(
