@@ -93,7 +93,7 @@ async def run_code(
     function_source: Annotated[
         str,
         Field(
-            description="The source code of the function to run. This must be a single, valid python function that can be executed directly with no imports."
+            description="The source code of the function to run. Any required imports must be within the body of the function."
         ),
     ],
     hostname: Annotated[
